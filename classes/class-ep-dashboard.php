@@ -251,10 +251,26 @@ class EP_Dashboard {
 
 		
 		//BEGIN BRANDWAFFLE
-		$comment_query = new WP_Comment_Query( array('ID' => 1) );
-		//print_r($comment_query);
-		$comment_args = $comment_query->comments[0];
-		$result = ep_index_comment($comment_args);
+		$index_meta['comment_offset'] = 0;
+		$index_meta['found_comments'] = true;
+		
+		
+		while( $index_meta['found_comments'] ) {
+			
+			var_dump($index_meta);
+			$comment_query = new WP_Comment_Query( array('number' => 20, 'offset' => $index_meta['comments_offset']) );
+
+			if( ! $comment_query->comments[0] ) {
+				$index_meta['found_comments'] = false;
+			}
+
+			foreach( $comment_query->comments as $comment ) {
+				$result = ep_index_comment( $comment );			
+			}
+			
+			$index_meta['comments_offset'] = absint( $index_meta['comments_offset'] + 20 );
+		}
+		
 		//print_r($result);
 		/*
 if ( function_exists( 'wp_json_encode' ) ) {
