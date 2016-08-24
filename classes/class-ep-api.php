@@ -96,6 +96,62 @@ class EP_API {
 
 		return false;
 	}
+	
+	/**
+	 * Index a post under a given site index or the global index ($site_id = 0)
+	 *
+	 * @param array $post
+	 * @param bool $blocking
+	 * @since 0.1.0
+	 * @return array|bool|mixed
+	 */
+	public function index_comment( $comment, $blocking = true ) {
+
+		/**
+		 * Filter post prior to indexing
+		*
+		* Allows for last minute indexing of post information.
+		*
+		* @since 1.7
+		*
+		* @param         array Array of comment information to index.
+		*/
+		$comment = apply_filters( 'ep_pre_index_comment', $comment );
+
+		$index = trailingslashit( ep_get_index_name() );
+
+		$path = $index . 'comment/' . $comment->comment_ID;
+
+		if ( function_exists( 'wp_json_encode' ) ) {
+
+			$encoded_comment = wp_json_encode( $comment );
+
+		} else {
+
+			$encoded_comment = json_encode( $comment );
+
+		}
+
+		$request_args = array(
+			'body'    => $encoded_comment,
+			'method'  => 'PUT',
+			'timeout' => 15,
+			'blocking' => $blocking,
+		);
+
+		$request = ep_remote_request( $path, apply_filters( 'ep_index_comment_request_args', $request_args, $comment ) );
+
+		do_action( 'ep_index_comment_retrieve_raw_response', $request, $comment, $path );
+
+		if ( ! is_wp_error( $request ) ) {
+			$response_body = wp_remote_retrieve_body( $request );
+
+			return json_decode( $response_body );
+		}
+
+		return false;
+	}
+
 
 	/**
 	 * Pull the site id from the index name
@@ -2194,6 +2250,10 @@ EP_API::factory();
 
 function ep_index_post( $post, $blocking = true ) {
 	return EP_API::factory()->index_post( $post, $blocking );
+}
+
+function ep_index_comment( $comment, $blocking = true ) {
+	return EP_API::factory()->index_comment( $comment, $blocking );
 }
 
 function ep_query( $args, $query_args, $scope = 'current' ) {

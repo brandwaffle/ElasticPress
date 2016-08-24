@@ -155,7 +155,7 @@ class EP_Dashboard {
 		 * If we are on the setting screen and a host has never been set in the options table or defined, then let's
 		 * assume this is our first time and not show an obvious message.
 		 */
-		if ( ! empty( $_GET['page'] ) && 'elasticpress-settings' === $_GET['page'] && false === $options_host && ( ! defined( 'EP_HOST' ) || ! EP_HOST ) ) {
+		if ( ! empty( $_GET['page'] ) && 'elasticpress-settings' === $_GET['page'] && false === $options_host && ( ! defined( 'EP_HOST' ) || empty( EP_HOST ) ) ) {
 			return;
 		}
 
@@ -249,6 +249,24 @@ class EP_Dashboard {
 
 		do_action( 'ep_pre_dashboard_index', $index_meta, $status );
 
+		
+		//BEGIN BRANDWAFFLE
+		$comment_query = new WP_Comment_Query( array('ID' => 1) );
+		//print_r($comment_query);
+		$comment_args = $comment_query->comments[0];
+		$result = ep_index_comment($comment_args);
+		//print_r($result);
+		/*
+if ( function_exists( 'wp_json_encode' ) ) {
+			$queued_comments[ 1 ][] = addcslashes( wp_json_encode( $comment_args ), "\n" );
+		} else {
+			$queued_comments[ 1 ][] = addcslashes( json_encode( $comment_args ), "\n" );
+		}		
+		print_r($queued_comments);
+*/
+		
+		//END BRANDWAFFLE
+		
 		$args = apply_filters( 'ep_index_posts_args', array(
 			'posts_per_page'         => $posts_per_page,
 			'post_type'              => ep_get_indexable_post_types(),

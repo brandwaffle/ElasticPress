@@ -250,6 +250,28 @@ class EP_Sync_Manager {
 
 		return $response;
 	}
+
+	/**
+	 * Sync a comment for a specific site or globally.
+	 *
+	 * @param int $comment_id
+	 * @param bool $blocking
+	 * @since 0.1.0
+	 * @return bool|array
+	 */
+	public function sync_comment( $comment_id, $blocking = true ) {
+
+		$comment_args = ep_prepare_comment( $comment_id );
+
+		if ( apply_filters( 'ep_comment_sync_kill', false, $comment_args, $comment_id ) ) {
+			return;
+		}
+
+		$response = ep_index_comment( $comment_args, $blocking );
+
+		return $response;
+	}
+
 }
 
 $ep_sync_manager = EP_Sync_Manager::factory();
@@ -260,4 +282,8 @@ $ep_sync_manager = EP_Sync_Manager::factory();
 
 function ep_sync_post( $post_id, $blocking = true ) {
 	return EP_Sync_Manager::factory()->sync_post( $post_id, $blocking );
+}
+
+function ep_sync_comment( $comment_id, $blocking = true ) {
+	return EP_Sync_Manager::factory()->sync_comment( $comment_id, $blocking );
 }
