@@ -54,6 +54,15 @@ return array(
 		),
 	),
 	'mappings' => array(
+		'comment' => array(
+			'properties' => array(
+				'comment_author' => array(
+					'type' => 'string',
+					'index' => 'not_analyzed',
+				),
+				
+			)
+		),
 		'post' => array(
 			'date_detection' => false,
 			'dynamic_templates' => array(

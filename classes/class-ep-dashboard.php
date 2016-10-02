@@ -248,40 +248,6 @@ class EP_Dashboard {
 		$posts_per_page = apply_filters( 'ep_index_posts_per_page', 350 );
 
 		do_action( 'ep_pre_dashboard_index', $index_meta, $status );
-
-		
-		//BEGIN BRANDWAFFLE
-		$index_meta['comment_offset'] = 0;
-		$index_meta['found_comments'] = true;
-		
-		
-		while( $index_meta['found_comments'] ) {
-			
-			var_dump($index_meta);
-			$comment_query = new WP_Comment_Query( array('number' => 20, 'offset' => $index_meta['comments_offset']) );
-
-			if( ! $comment_query->comments[0] ) {
-				$index_meta['found_comments'] = false;
-			}
-
-			foreach( $comment_query->comments as $comment ) {
-				$result = ep_index_comment( $comment );			
-			}
-			
-			$index_meta['comments_offset'] = absint( $index_meta['comments_offset'] + 20 );
-		}
-		
-		//print_r($result);
-		/*
-if ( function_exists( 'wp_json_encode' ) ) {
-			$queued_comments[ 1 ][] = addcslashes( wp_json_encode( $comment_args ), "\n" );
-		} else {
-			$queued_comments[ 1 ][] = addcslashes( json_encode( $comment_args ), "\n" );
-		}		
-		print_r($queued_comments);
-*/
-		
-		//END BRANDWAFFLE
 		
 		$args = apply_filters( 'ep_index_posts_args', array(
 			'posts_per_page'         => $posts_per_page,
@@ -321,6 +287,40 @@ if ( function_exists( 'wp_json_encode' ) ) {
 						} else {
 							$queued_posts[ get_the_ID() ][] = addcslashes( json_encode( $post_args ), "\n" );
 						}
+					
+						//BEGIN BRANDWAFFLE
+						$index_meta['comments_offset'] = 0;
+						$index_meta['found_comments'] = true;
+						
+						while( $index_meta['found_comments'] ) {
+						
+							$comment_query = new WP_Comment_Query( array('post_id' => get_the_ID(), 'number' => 350, 'offset' => $index_meta['comments_offset']) );
+
+							if( ! $comment_query->comments[0] ) {
+								$index_meta['found_comments'] = false;
+								$index_meta['comments_offset'] = 0;
+							}
+							
+							foreach( $comment_query->comments as $comment ) {
+								$result = ep_index_comment( $comment );			
+							}
+							
+							$index_meta['comments_offset'] = absint( $index_meta['comments_offset'] + 350 );
+						}
+						
+						$index_meta['found_comments'] = true;
+						
+						//print_r($result);
+						/*
+						if ( function_exists( 'wp_json_encode' ) ) {
+						$queued_comments[ 1 ][] = addcslashes( wp_json_encode( $comment_args ), "\n" );
+						} else {
+						$queued_comments[ 1 ][] = addcslashes( json_encode( $comment_args ), "\n" );
+						}		
+						print_r($queued_comments);
+						*/
+						
+						//END BRANDWAFFLE
 					}
 				}
 
